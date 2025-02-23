@@ -10,7 +10,7 @@ public class GuitarString : MonoBehaviour
     [Tooltip("Kilograms")] public float LinearMassDensity = 0f;
     [Tooltip("Meters")] public float Length = 0.648f;
     [Tooltip("Newton")] public float Tension = 0;
-
+    public float shouldBeFrequency;
 
 
 
@@ -49,7 +49,8 @@ public class GuitarString : MonoBehaviour
         StringRend();
 
         fret = guitar.CapoNumber;
-        frequency = FundementalFrequency();
+        frequency = shouldBeFrequency * Mathf.Pow(2f, (float)fret / 12f);
+        //frequency = FundementalFrequency();
 
         if(audioSource.isPlaying){
             amplitude -= Time.deltaTime * 0.5f;

@@ -12,6 +12,7 @@ public class Guitar : MonoBehaviour
     public List<AudioSource> audioSources;
     private static readonly float[] linearMassDensities = { 0.0065f, 0.0052f, 0.0037f, 0.0025f, 0.0017f, 0.0012f };
     private static readonly float[] stringTensions = { 77.0f, 72.0f, 66.0f, 59.0f, 53.0f, 48.0f };
+    public readonly float[] baseFrequencies = { 82f, 110, 147f, 196, 247, 330 };
 
     [Header("Frets")]
     public int CapoNumber = 0;
@@ -37,6 +38,7 @@ public class Guitar : MonoBehaviour
             guitarString.id = i;
             guitarString.LinearMassDensity = linearMassDensities[i];
             guitarString.Tension = stringTensions[i];
+            guitarString.shouldBeFrequency = baseFrequencies[i];
             guitarString.guitar = this;
 
             guitarString.audioSource = tempString.AddComponent<AudioSource>();
