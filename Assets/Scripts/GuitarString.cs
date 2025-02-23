@@ -85,7 +85,7 @@ public class GuitarString : MonoBehaviour
         // Stop audio then play. With new amplitude (changes to reduce clipping)
         audioSource.Stop();
         audioSource.Play();
-        amplitude = 1f;
+        amplitude = .8f;
     }
 
     public void MuteString(){
@@ -120,8 +120,12 @@ public class GuitarString : MonoBehaviour
             sample += 0.5f * SineWave.CreateSine(timeIndex + 1, frequency * 2, sampleRate);
             sample += 0.3f * SineWave.CreateSine(timeIndex + 2, frequency * 3, sampleRate);
             sample += 0.2f * SineWave.CreateSine(timeIndex + 3, frequency * 4, sampleRate);
+            sample -= 0.5f * SineWave.CreateSine(timeIndex + 4, frequency * 5, sampleRate);
+            sample -= 0.3f * SineWave.CreateSine(timeIndex + 5, frequency * 6, sampleRate);
+            sample -= 0.2f * SineWave.CreateSine(timeIndex + 6, frequency * 7, sampleRate);
 
             // Normalize to prevent clipping
+            sample *= 0.5f;
             if(sample > 1)
                 sample = 1;
             if(sample < -1)
