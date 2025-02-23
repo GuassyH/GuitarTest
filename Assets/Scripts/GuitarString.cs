@@ -12,33 +12,35 @@ public class GuitarString : MonoBehaviour
     [Tooltip("Newton")] public float Tension = 0;
     public float shouldBeFrequency;
 
-
-
-
     public float frequency;
-
     public float sampleRate = 44100;
 	public float waveLengthInSeconds = 2.0f;
-    public List<GameObject> guitarStrings;
-
-	public AudioSource audioSource;
-	int timeIndex = 0;
-
-    float amplitude;
-    public float multiplier;
     public int fret;
 
+	int timeIndex = 0;
+
+
+
+	[HideInInspector] public AudioSource audioSource;
+    [HideInInspector] public float multiplier;
+    [HideInInspector] public float amplitude;
+    [HideInInspector] public Material stringMat;
     [HideInInspector] public float id;
     [HideInInspector] public Guitar guitar;
 
+
+
     LineRenderer stringRend;
+    
+    Vector3 stringPos;
 
 	void Awake()
 	{
         this.transform.position = new Vector2(-3, (-2.5f/5) + (id/5));
         stringRend = this.gameObject.AddComponent<LineRenderer>();
-        stringRend.positionCount = 4;
+        stringRend.positionCount = 5;
         stringRend.startWidth = 0.0015f;
+        stringRend.materials[0] = stringMat;
 
     }
 	
@@ -58,41 +60,51 @@ public class GuitarString : MonoBehaviour
                 audioSource.Stop();
             }
         }
+
 	}
 
     float NewLength() {
+        // Get the length of the string from the fret to th bridge
         float d = Length / Mathf.Pow(2f, (float)fret / 12f);
         return d;
     }
 
-    float FundementalFrequency(){    
+    float FundementalFrequency(){
+        // Calculate the frequency it should have based on tension, LMD, and length (calculated above). Currently works WIP
+        // Debug.Log($"String {id}: Length={L}, Tension={T}, LinearMassDensity={mu}, Frequency={f} Hz");
         float L = NewLength();
         float mu = LinearMassDensity;
         float T = Tension;
         float f = 1f / (2f * Length) * Mathf.Sqrt(T / mu);
         
-        Debug.Log($"String {id}: Length={L}, Tension={T}, LinearMassDensity={mu}, Frequency={f} Hz");
-        
         return f;
     }
 
-	
-    public void PlayString(float newAmplitude){
+
+    public void PlayString(){
+        // Stop audio then play. With new amplitude (changes to reduce clipping)
         audioSource.Stop();
         audioSource.Play();
         amplitude = 1f;
-        multiplier = newAmplitude;
-
     }
 
+    public void MuteString(){
+        audioSource.Stop();
+        amplitude = 0f;
+    }
 
     void StringRend(){
-        Vector3 stringPos = new Vector2(-(Length * 0.5f), (-2.5f/80) + (id/80));
 
-        stringRend.SetPosition(0, stringPos);
-        stringRend.SetPosition(1, stringPos + (Vector3.right*(Length - NewLength())));
-        stringRend.SetPosition(2, new Vector2(stringPos.x + (Length * 0.75f), stringPos.y + Mathf.Sin(Time.time * frequency) * (amplitude/150)));
-        stringRend.SetPosition(3, new Vector2(stringPos.x + Length, stringPos.y));
+        // Set the positions of the line renderer. From the nut, to the neck bridge, to the fret, to the mid point between fret and bridge, to bridge
+        stringPos = new Vector2(-(Length * 0.5f), (-2.5f/100) + (id/100));
+
+        if(id<=2){  stringRend.SetPosition(0,  new Vector2(stringPos.x - ((id + 1) * 0.04f), -3.5f/100));   }
+        else{  stringRend.SetPosition(0,  new Vector2(stringPos.x - ((3 - (id - 3)) * 0.04f), 3.5f/100));  }
+
+        stringRend.SetPosition(1, stringPos);
+        stringRend.SetPosition(2, stringPos + (Vector3.right*(Length - NewLength())));
+        stringRend.SetPosition(3, new Vector2((stringRend.GetPosition(2).x + stringRend.GetPosition(4).x)/2, stringPos.y + Mathf.Sin(Time.time * frequency) * (amplitude/250)));
+        stringRend.SetPosition(4, new Vector2(stringPos.x + Length, stringPos.y));
 
     }
 
@@ -103,9 +115,7 @@ public class GuitarString : MonoBehaviour
         {
             float sample = 0;
 
-            // Fundamental frequency
-           // sample = SineWave.CreateSine(timeIndex, frequency, sampleRate);
-
+            // Fundamental frequency as well as harmonics
             sample += 1.0f * SineWave.CreateSine(timeIndex, frequency, sampleRate);
             sample += 0.5f * SineWave.CreateSine(timeIndex + 1, frequency * 2, sampleRate);
             sample += 0.3f * SineWave.CreateSine(timeIndex + 2, frequency * 3, sampleRate);
